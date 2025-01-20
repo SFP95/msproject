@@ -84,7 +84,6 @@ class _RulesPage extends State<RulesPage> {
               SizedBox(height: 30),
 
               // Mostrar un indicador de carga mientras las reglas se cargan
-              // Mostrar un indicador de carga mientras las reglas se cargan
               isLoading
                   ? Center(child: CircularProgressIndicator(color: Color.fromARGB(255, 241, 170, 155),))
                   : (rules.isEmpty
