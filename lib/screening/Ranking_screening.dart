@@ -74,22 +74,34 @@ class _PuntuacionPage extends State<PuntuacionPage> {
                   children: [
                     Text(
                       "Puntuación Total del Mes",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFF1A99B)),
+                      style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFF1A99B)),
                     ),
                     SizedBox(height: 5),
                     Text(
                       "${(totalScore * 100).toStringAsFixed(0)}",
-                      style: TextStyle(fontSize: 22, color: Colors.white),
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
                     ),
                     SizedBox(height: 5),
                     Text(
                       "Puntuación Total de la Semana",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFF1A99B)),
+                      style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFF1A99B)),
                     ),
                     SizedBox(height: 5),
                     Text(
                       "${(weeklyScore * 100).toStringAsFixed(0)}",
-                      style: TextStyle(fontSize: 22, color: Colors.white),
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
                     ),
                   ],
                 ),
