@@ -188,18 +188,24 @@ class _MisionsPage extends State<MisionsPage> {
               ),
             ),
           ),
-          SizedBox(height: 10), // Espacio entre el texto y la puntuación
+          SizedBox(height: 10),
+          Divider(
+            indent: 90,endIndent: 90,
+            color: Color.fromARGB(255, 68, 64, 104),
+            thickness: 1.2,
+          ),// Espacio entre el texto y la puntuación
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+
                 Text(
                   "Puntuación:   ",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF3E1F47),
+                    color: Color.fromARGB(255, 68, 64, 104),
                   ),
                 ),
                 Text(
@@ -207,12 +213,13 @@ class _MisionsPage extends State<MisionsPage> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF3E1F47),
+                    color: Color.fromARGB(255, 68, 64, 104),
                   ),
                 ),
               ],
             ),
           ),
+          SizedBox(height: 10),
         ],
       ),
     );
