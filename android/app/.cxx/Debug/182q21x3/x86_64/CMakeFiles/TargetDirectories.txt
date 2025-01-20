@@ -1,0 +1,2 @@
+C:/Users/Sonyn/AndroidStudioProjects/msproject/android/app/.cxx/Debug/182q21x3/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/Sonyn/AndroidStudioProjects/msproject/android/app/.cxx/Debug/182q21x3/x86_64/CMakeFiles/rebuild_cache.dir

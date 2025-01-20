@@ -1,0 +1,36 @@
+{
+  "rules":[
+    {
+      "title": "Asignación de Misiones:",
+      "content": "* Cada jugador recibirá 5 misiones cotidianas seleccionadas al azar.\n* Las misiones serán enviadas al jugador al inicio del periodo de 24 horas."
+    },
+    {
+      "title": "Periodo de Juego:",
+      "content": "* Los jugadores tienen un máximo de 24 horas (0:00) para completar las 5 misiones asignadas.\n* El periodo de juego comienza en el momento en que se entregan las misiones (1:00)."
+    },
+    {
+      "title": "Pruebas de Misión:",
+      "content": "* Para validar cada misión completada, el jugador debe proporcionar una prueba en forma de foto o video.\n* Las pruebas deben ser claras y mostrar la misión completada de manera evidente."
+    },
+    {
+      "title": "Validación de Misiones:",
+      "content": "* Las pruebas de misión deben enviarse a un árbitro o grupo de validación designado.\n* El árbitro o grupo de validación revisará las pruebas y confirmará si la misión ha sido completada correctamente."
+    },
+    {
+      "title": "Sistema de Puntuación:",
+      "content": "* Cada misión tiene un valor de puntos asignado (de 1 a 5, dependiendo de su dificultad y tiempo requerido).\n* Los puntos se otorgan solo si la misión es validada correctamente."
+    },
+    {
+      "title": "Ganador:",
+      "content": "* El jugador que acumule más puntos después de completar las 5 misiones será declarado ganador al final del mes.\n* En caso de empate en puntos, se considerará el tiempo total tomado para completar las misiones; el jugador que haya completado las misiones más rápido ganará."
+    },
+    {
+      "title": "Conducta:",
+      "content": "* Los jugadores deben completar las misiones de manera honesta y no deben manipular o falsificar las pruebas.\n* El respeto y la deportividad deben mantenerse en todo momento."
+    },
+    {
+      "title": "Penalizaciones:",
+      "content": "* Las misiones no completadas o con pruebas insuficientes no recibirán puntos.\n* Cualquier intento de trampa o comportamiento antideportivo resultará en la descalificación del jugador.\n* No se permite SPAM de ningún tipo en los canales de Text, si esto ocurre se le sancionará y eliminará del grupo.\n* Las pruebas no pueden contener violencia de ningún tipo, tanto a personas como animales, y tampoco a uno mismo.\n* Las pruebas no deben tener contenido sexual, en caso de saltarte esta como la anterior pauta, se sancionará al usuario y se eliminará del juego, perdiendo también todos sus puntos."
+    }
+  ]
+}
