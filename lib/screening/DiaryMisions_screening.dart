@@ -115,7 +115,7 @@ class _MisionsPage extends State<MisionsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Misiones",
+          "Misiones Diarias",
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 32,

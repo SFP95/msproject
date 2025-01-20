@@ -63,7 +63,7 @@ class _HomePageState extends State<Home> {
                 label: 'Home',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.gamepad),
+                icon: Icon(Icons.library_books_sharp),
                 label: 'Misiones',
               ),
               BottomNavigationBarItem(

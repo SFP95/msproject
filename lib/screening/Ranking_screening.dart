@@ -22,7 +22,7 @@ class _PuntuacionPage extends State<PuntuacionPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Puntuación del Mes",
+        title: Text("Puntuación",
             style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,

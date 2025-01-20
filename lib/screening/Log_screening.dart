@@ -72,7 +72,7 @@ class _LoginPage extends State<LoginPage> {
           backgroundColor: Color.fromARGB(255, 68, 64, 104), // Fondo del popup
           title: Text(
             "Registro de Usuario",
-            style: TextStyle(
+            style: TextStyle(fontWeight: FontWeight.bold,
               color: Color(0xFFF1A99B), // Color del título
             ),
           ),
@@ -137,7 +137,7 @@ class _LoginPage extends State<LoginPage> {
                 SizedBox(height: 20),
                 Text(
                   "En caso de no tener cuenta, pulse 'Register'",
-                  style: TextStyle(fontSize: 10, color: Colors.grey),
+                  style: TextStyle(fontSize: 13, color: Colors.grey),
                 ),
                 SizedBox(height: 30),
                 Row(
@@ -219,7 +219,12 @@ class _RegistroPage extends State<RegistroPage> {
             onPressed: () {
               if (_formKey.currentState?.validate() ?? false) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Registro Exitoso')));
+                    SnackBar(backgroundColor: Color.fromARGB(255, 42, 39, 73),
+                        duration: Duration(milliseconds: 90),
+                        content: Text('Registro Exitoso',
+                          style: TextStyle(
+                            color: Color(0xFFF1A99B),
+                            fontWeight: FontWeight.bold,),)));
               }
             },
             style: ElevatedButton.styleFrom(
