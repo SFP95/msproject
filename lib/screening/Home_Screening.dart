@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:msproject/screening/Log_screening.dart';
+import 'package:msproject/screening/Register_screening.dart';
 import 'Rules_Screening.dart';
 import 'Ranking_screening.dart';
 import 'DiaryMisions_screening.dart';
@@ -21,6 +22,7 @@ class _HomePageState extends State<Home> {
     PuntuacionPage(),
     //ConfiguracionPage(),
     LoginPage(),
+    //RegistroPage()
   ];
 
   void _onItemTapped(int index) {
