@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'dart:ui';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MisionsPage extends StatefulWidget {
   @override
@@ -11,57 +10,83 @@ class MisionsPage extends StatefulWidget {
 }
 
 class _MisionsPage extends State<MisionsPage> {
-  List<Map<String, dynamic>> missions = []; // Lista de misiones
-  List<Map<String, dynamic>> userMissions = []; // Misiones aleatorias asignadas
-  int totalPoints = 0; // Contador de puntos del usuario
+  List<Map<String, dynamic>> missions = []; // Lista de todas las misiones
+  List<Map<String, dynamic>> userMissions = []; // Misiones asignadas para hoy
+  int dayPoints = 0; // Puntos acumulados en el día
   late Timer _timer; // Temporizador para la cuenta atrás
-  Duration _timeLeft = Duration.zero; // Tiempo restante
-  String _todayKey = ""; // Identificador único para el día actual
+  Duration _timeLeft = Duration.zero; // Tiempo restante para la medianoche
 
   @override
   void initState() {
     super.initState();
-    _generateTodayKey(); // Generar clave para el día
-    _loadMissions();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    await _loadMissions();
     _startCountdown();
+    await _loadDailyState();
   }
 
-  // Generar un identificador único para el día actual
-  void _generateTodayKey() {
-    final now = DateTime.now();
-    _todayKey = "${now.year}-${now.month}-${now.day}";
-  }
-
-  // Cargar misiones desde el archivo JSON
   Future<void> _loadMissions() async {
     try {
+      // Cargar el contenido del archivo JSON
       final String jsonString = await DefaultAssetBundle.of(context).loadString('assets/misiones.json');
+
+      // Decodificar el contenido JSON
       final Map<String, dynamic> jsonResponse = json.decode(jsonString);
 
-      setState(() {
-        missions = List<Map<String, dynamic>>.from(
-          jsonResponse['misiones'].map((mission) {
-            return {
-              "nombre": mission["nombre"],
-              "detalles": mission["detalles"],
-              "puntos": mission["puntos"],
-              "completed": false,
-              "evidence": null,
-            };
-          }).toList(),
-        );
-      });
-
-      // Si no hay misiones asignadas para hoy, asignarlas
-      if (userMissions.isEmpty) {
-        _assignRandomMissions();
-      }
+      // Asignar las misiones a la lista
+      missions = List<Map<String, dynamic>>.from(
+        jsonResponse['misiones'].map((mission) {
+          return {
+            "nombre": mission["nombre"],
+            "detalles": mission["detalles"],
+            "puntos": mission["puntos"],
+            "completed": false,
+          };
+        }),
+      );
+      //print("Misiones cargadas: $missions"); // Debug: Verificar misiones cargadas
     } catch (e) {
-      print("Error al cargar las misiones: $e");
+      //print("Error al cargar las misiones: $e"); // Debug: Mostrar errores
     }
   }
 
-  // Asignar 5 misiones aleatorias
+
+
+  Future<void> _loadDailyState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final todayKey = _generateTodayKey();
+
+    // Cargar puntos acumulados
+    dayPoints = prefs.getInt('${todayKey}_points') ?? 0;
+
+    // Cargar misiones asignadas
+    final missionsString = prefs.getString('${todayKey}_missions');
+    if (missionsString != null) {
+      userMissions = List<Map<String, dynamic>>.from(json.decode(missionsString));
+    } else {
+      _assignRandomMissions();
+      await _saveDailyState();
+    }
+
+    setState(() {});
+  }
+
+  Future<void> _saveDailyState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final todayKey = _generateTodayKey();
+
+    await prefs.setInt('${todayKey}_points', dayPoints);
+    await prefs.setString('${todayKey}_missions', json.encode(userMissions));
+  }
+
+  String _generateTodayKey() {
+    final now = DateTime.now();
+    return "${now.year}-${now.month}-${now.day}";
+  }
+
   void _assignRandomMissions() {
     final random = Random();
     final selectedMissions = <Map<String, dynamic>>[];
@@ -71,19 +96,14 @@ class _MisionsPage extends State<MisionsPage> {
         selectedMissions.add(mission);
       }
     }
-    setState(() {
-      userMissions = selectedMissions;
-    });
+    userMissions = selectedMissions;
   }
 
-  // Iniciar el temporizador de cuenta atrás
   void _startCountdown() {
     final now = DateTime.now();
     final nextMidnight = DateTime(now.year, now.month, now.day + 1);
-    final durationUntilMidnight = nextMidnight.difference(now);
-
     setState(() {
-      _timeLeft = durationUntilMidnight;
+      _timeLeft = nextMidnight.difference(now); // Inicializar correctamente
     });
 
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
@@ -92,16 +112,21 @@ class _MisionsPage extends State<MisionsPage> {
           _timeLeft -= Duration(seconds: 1);
         });
       } else {
-        // Reiniciar misiones al finalizar el día
-        _timer.cancel();
-        _generateTodayKey();
-        _assignRandomMissions();
-        _startCountdown();
+        _resetDailyMissions();
       }
     });
   }
 
-  // Función para formatear el tiempo restante
+
+  Future<void> _resetDailyMissions() async {
+    _timer.cancel();
+    _assignRandomMissions();
+    dayPoints = 0;
+    await _saveDailyState();
+    _startCountdown();
+    setState(() {});
+  }
+
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final hours = twoDigits(duration.inHours);
@@ -138,7 +163,7 @@ class _MisionsPage extends State<MisionsPage> {
                   style: TextStyle(fontSize: 17, color: Colors.white),
                 ),
                 Text(
-                  "Puntos Totales: $totalPoints",
+                  "Puntos diarios: $dayPoints",
                   style: TextStyle(fontSize: 17, color: Colors.white),
                 ),
               ],
@@ -167,7 +192,7 @@ class _MisionsPage extends State<MisionsPage> {
       color: Color(0xFFF1A99B),
       margin: EdgeInsets.only(top: 8, bottom: 8),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15), // Bordes redondeados
+        borderRadius: BorderRadius.circular(15),
       ),
       child: Column(
         children: [
@@ -188,33 +213,48 @@ class _MisionsPage extends State<MisionsPage> {
               ),
             ),
           ),
-          SizedBox(height: 2),
           Divider(
-            indent: 10,endIndent: 230,
+            indent: 10,
+            endIndent: 230,
             color: Color.fromARGB(255, 68, 64, 104),
             thickness: 1.2,
-          ),// Espacio entre el texto y la puntuación
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "Puntuación:   ",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 68, 64, 104),
-                  ),
+            Text(
+            "Puntuación: ${mission['puntos']}",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 68, 64, 104),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: mission['completed']
+                  ? null
+                  : () async {
+                setState(() {
+                  mission['completed'] = true;
+                  dayPoints += (mission['puntos'] ?? 0) as int;
+                });
+                await _saveDailyState();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: mission['completed']
+                    ? Colors.grey
+                    : Color.fromARGB(255, 68, 64, 104),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                Text(
-                  "${mission['puntos']}",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 68, 64, 104),
-                  ),
-                ),
+              ),
+              child: Text(
+                mission['completed'] ? "Completada" : "Completar",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
               ],
             ),
           ),
