@@ -15,16 +15,55 @@ class Home extends StatefulWidget {
 class _HomePageState extends State<Home> {
   int _selectedIndex = 0;
 
-  // Lista de páginas con sus respectivas clases
-  final List<Widget> _pages = [
-    RulesPage(),
-    MisionsPage(),
-    PuntuacionPage(),
-    //ConfiguracionPage(),
-    LoginPage(),
-    //RegistroPage()
-  ];
+  double _dayPoints = 0.0;  // Puntos del día
+  double _weekPoints = 0.0; // Puntos de la semana
+  double _monthPoints = 0.0; // Puntos del mes
 
+  // Lista de páginas con sus respectivas clases, pasando los parámetros
+  final List<Widget> _pages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicializamos las páginas con los datos necesarios
+    _pages.addAll([
+      RulesPage(),
+      MisionsPage(),
+      PuntuacionPage(
+        dayPoints: _dayPoints,
+        weekPoints: _weekPoints,
+        monthPoints: _monthPoints,
+        onDayEndCallback: _handleDayEnd,
+        onWeekEndCallback: _handleWeekEnd,
+        onMonthEndCallback: _handleMonthEnd,
+        remainingTime: Duration(days: 1),
+      ),
+      LoginPage(),
+    ]);
+  }
+
+  // Callback que reinicia los puntos del día
+  void _handleDayEnd() {
+    setState(() {
+      _dayPoints = 0.0;
+    });
+  }
+
+  // Callback que reinicia los puntos de la semana
+  void _handleWeekEnd() {
+    setState(() {
+      _weekPoints = 0.0;
+    });
+  }
+
+  // Callback que reinicia los puntos del mes
+  void _handleMonthEnd() {
+    setState(() {
+      _monthPoints = 0.0;
+    });
+  }
+
+  // Función que se llama cuando un item del BottomNavigationBar es seleccionado
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -34,12 +73,11 @@ class _HomePageState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 42, 39, 73), // fonde detras del menu
+      backgroundColor: Color.fromARGB(255, 42, 39, 73), // fondo del cuerpo
       body: Container(
         color: Color.fromARGB(255, 42, 39, 73),
-        //255, 68, 64, 104
         child: SafeArea(
-          child: _pages[_selectedIndex],
+          child: _pages[_selectedIndex], // Cargar la página seleccionada
         ),
       ),
       bottomNavigationBar: Container(
@@ -56,7 +94,6 @@ class _HomePageState extends State<Home> {
         child: ClipRRect(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           child: BottomNavigationBar(
-
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.home),
@@ -87,4 +124,3 @@ class _HomePageState extends State<Home> {
     );
   }
 }
-

@@ -1,124 +1,220 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:percent_indicator/percent_indicator.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 
 class PuntuacionPage extends StatefulWidget {
+  final double dayPoints; // Puntuación diaria desde la clase Misiones
+  final Duration remainingTime; // Temporizador sincronizado con Misiones
+  final Function onDayEndCallback; // Callback cuando el día termina
+  final Function onWeekEndCallback; // Callback cuando la semana termina
+  final Function onMonthEndCallback; // Callback cuando el mes termina
+
+  PuntuacionPage({
+    required this.dayPoints,
+    required this.remainingTime,
+    required this.onDayEndCallback,
+    required this.onWeekEndCallback,
+    required this.onMonthEndCallback,
+    required double monthPoints,
+    required double weekPoints,
+  });
+
   @override
-  State<PuntuacionPage> createState() => _PuntuacionPage();
+  State<PuntuacionPage> createState() => _PuntuacionPageState();
 }
 
-class _PuntuacionPage extends State<PuntuacionPage> {
-  // Puntuación mensual en formato de porcentaje (0.0 a 1.0)
-  final List<double> monthlyScores = [0.7, 0.8, 0.5, 0.9, 0.6, 0.4, 0.8];
-  double dailyScore = 0.0; // Puntuación del día (será sumada a la lista de puntuaciones mensuales)
+class _PuntuacionPageState extends State<PuntuacionPage> {
+  late Timer timer;
+  late Duration remainingTime;
+
+  double dayPoints = 0.0;
+  double weekPoints = 0.0;
+  double monthPoints = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    remainingTime = widget.remainingTime;
+    dayPoints = widget.dayPoints;
+    _startCountdown();
+  }
+
+  void _startCountdown() {
+    timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (remainingTime.inSeconds > 0) {
+        setState(() {
+          remainingTime -= Duration(seconds: 1);
+        });
+      } else {
+        timer.cancel();
+        _onDayEnd();
+      }
+    });
+  }
+
+  void _onDayEnd() {
+    setState(() {
+      weekPoints += dayPoints;
+      monthPoints += dayPoints;
+      dayPoints = 0; // Reinicia los puntos diarios
+    });
+    widget.onDayEndCallback(); // Llama al callback de la clase Misiones
+
+    // Verifica si termina la semana
+    if (_isEndOfWeek()) {
+      widget.onWeekEndCallback(); // Callback para el final de la semana
+      setState(() {
+        weekPoints = 0; // Reinicia los puntos semanales
+      });
+    }
+
+    // Verifica si termina el mes
+    if (_isEndOfMonth()) {
+      widget.onMonthEndCallback(); // Callback para el final del mes
+      setState(() {
+        monthPoints = 0; // Reinicia los puntos mensuales
+      });
+    }
+  }
+
+  bool _isEndOfWeek() {
+    return DateTime.now().weekday == DateTime.sunday;
+  }
+
+  bool _isEndOfMonth() {
+    final now = DateTime.now();
+    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+    return now.day == lastDayOfMonth.day;
+  }
+
+  String _formatDuration(Duration duration) {
+    final hours = duration.inHours.toString().padLeft(2, '0');
+    final minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
+    final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
+    return "$hours:$minutes:$seconds";
+  }
+
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Calculamos el total de la puntuación mensual
-    double totalScore = monthlyScores.fold(0.0, (sum, score) => sum + score) + dailyScore;
-    double averageScore = totalScore / (monthlyScores.length + 1); // Promedio total
-
-    // Calculamos la puntuación de la semana (usamos solo los primeros 7 días para simplificar)
-    double weeklyScore = monthlyScores.sublist(0, 7).fold(0.0, (sum, score) => sum + score) / 7;
-
     return Scaffold(
       appBar: AppBar(
-        title: Text("Puntuación",
-            style: TextStyle(
+        title: Text(
+          "Puntuación",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 32,
+            color: Color(0xFFF1A99B),
+          ),
+        ),
+        backgroundColor: Color.fromARGB(255, 42, 39, 73),
+      ),
+      backgroundColor: Color.fromARGB(255, 42, 39, 73),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              "Tiempo restante del día",
+              style: TextStyle(fontSize: 20, color: Colors.white),
+            ),
+            SizedBox(height: 10),
+            Text(
+              _formatDuration(remainingTime),
+              style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFF1A99B))),
-        backgroundColor: Color.fromARGB(255, 42, 39, 73), // Color oscuro para la app bar
-      ),
-      backgroundColor: Color.fromARGB(255, 42, 39, 73), // Fondo claro para dar contraste
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(1.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: 90),
-              // Círculo que muestra la puntuación promedio
-              CircularPercentIndicator(
-                radius: 130.0, // Tamaño más grande del círculo
-                lineWidth: 15.0, // Grosor de la línea
-                percent: averageScore, // Valor de la puntuación promedio
-                center: Text(
-                  "${(averageScore * 100).toStringAsFixed(0)}%",
-                  style: TextStyle(fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
-                progressColor: Color(0xFFF1A99B), // Color suave y cálido para la barra de progreso
-                backgroundColor: Colors.grey[200]!, // Fondo gris claro
-                circularStrokeCap: CircularStrokeCap.round, // Bordes redondeados
+                color: Color(0xFFF1A99B),
               ),
-              SizedBox(height: 40),
-
-              // Sección con las puntuaciones
-              Container(
-                padding: EdgeInsets.all(30),
-                decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 68, 64, 104),
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      spreadRadius: 5,
-                      blurRadius: 7,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Puntuación Total del Mes",
-                      style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFFF1A99B)),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      "${(totalScore * 100).toStringAsFixed(0)}",
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      "Puntuación Total de la Semana",
-                      style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFFF1A99B)),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      "${(weeklyScore * 100).toStringAsFixed(0)}",
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                  ],
-                ),
+            ),
+            SizedBox(height: 20),
+            // Barra de progreso mensual
+            Text(
+              "Progreso del Mes",
+              style: TextStyle(fontSize: 20, color: Colors.white),
+            ),
+            LinearPercentIndicator(
+              lineHeight: 20.0,
+              percent: monthPoints / 1000, // Ajusta el divisor si necesitas otra escala
+              center: Text(
+                "${monthPoints.toStringAsFixed(1)} puntos",
+                style: TextStyle(color: Colors.white),
               ),
-              SizedBox(height: 40),
-            ],
-          ),
+              linearStrokeCap: LinearStrokeCap.roundAll,
+              backgroundColor: Colors.grey[800],
+              progressColor: Color(0xFFF1A99B),
+            ),
+            SizedBox(height: 20),
+            // Barra de progreso semanal
+            Text(
+              "Progreso de la Semana",
+              style: TextStyle(fontSize: 20, color: Colors.white),
+            ),
+            LinearPercentIndicator(
+              lineHeight: 20.0,
+              percent: weekPoints / 500, // Ajusta el divisor si necesitas otra escala
+              center: Text(
+                "${weekPoints.toStringAsFixed(1)} puntos",
+                style: TextStyle(color: Colors.white),
+              ),
+              linearStrokeCap: LinearStrokeCap.roundAll,
+              backgroundColor: Colors.grey[800],
+              progressColor: Color(0xFFF1A99B),
+            ),
+            SizedBox(height: 40),
+            // Ranking
+            Text(
+              "Ranking",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFF1A99B),
+              ),
+            ),
+            SizedBox(height: 10),
+            Expanded(
+              child: ListView.builder(
+                itemCount: 4, // Ajusta este número según el ranking dinámico
+                itemBuilder: (context, index) {
+                  final isCurrentUser = index == 3; // Ajusta esto según tu lógica
+                  return Card(
+                    color: isCurrentUser
+                        ? Color(0xFFF1A99B)
+                        : Colors.white,
+                    margin: EdgeInsets.symmetric(vertical: 5),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Color.fromARGB(255, 68, 64, 104),
+                        child: Text(
+                          "#${index + 1}",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      title: Text(
+                        "Jugador ${index + 1}",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 68, 64, 104),
+                        ),
+                      ),
+                      trailing: Text(
+                        "${(1200 - (index * 100))} puntos",
+                        style: TextStyle(color: Colors.black87),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
-  }
-
-  // Función para actualizar la puntuación diaria desde la segunda vista
-  void updateDailyScore(double score) {
-    setState(() {
-      dailyScore = score;
-      monthlyScores.add(score); // Se añade la puntuación diaria a la lista mensual
-    });
   }
 }

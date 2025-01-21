@@ -30,13 +30,10 @@ class _MisionsPage extends State<MisionsPage> {
 
   Future<void> _loadMissions() async {
     try {
-      // Cargar el contenido del archivo JSON
-      final String jsonString = await DefaultAssetBundle.of(context).loadString('assets/misiones.json');
-
-      // Decodificar el contenido JSON
+      final String jsonString =
+      await DefaultAssetBundle.of(context).loadString('assets/misiones.json');
       final Map<String, dynamic> jsonResponse = json.decode(jsonString);
 
-      // Asignar las misiones a la lista
       missions = List<Map<String, dynamic>>.from(
         jsonResponse['misiones'].map((mission) {
           return {
@@ -47,22 +44,16 @@ class _MisionsPage extends State<MisionsPage> {
           };
         }),
       );
-      //print("Misiones cargadas: $missions"); // Debug: Verificar misiones cargadas
     } catch (e) {
-      //print("Error al cargar las misiones: $e"); // Debug: Mostrar errores
+      print("Error al cargar las misiones: $e");
     }
   }
-
-
 
   Future<void> _loadDailyState() async {
     final prefs = await SharedPreferences.getInstance();
     final todayKey = _generateTodayKey();
 
-    // Cargar puntos acumulados
     dayPoints = prefs.getInt('${todayKey}_points') ?? 0;
-
-    // Cargar misiones asignadas
     final missionsString = prefs.getString('${todayKey}_missions');
     if (missionsString != null) {
       userMissions = List<Map<String, dynamic>>.from(json.decode(missionsString));
@@ -103,7 +94,7 @@ class _MisionsPage extends State<MisionsPage> {
     final now = DateTime.now();
     final nextMidnight = DateTime(now.year, now.month, now.day + 1);
     setState(() {
-      _timeLeft = nextMidnight.difference(now); // Inicializar correctamente
+      _timeLeft = nextMidnight.difference(now);
     });
 
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
@@ -116,7 +107,6 @@ class _MisionsPage extends State<MisionsPage> {
       }
     });
   }
-
 
   Future<void> _resetDailyMissions() async {
     _timer.cancel();
@@ -224,37 +214,37 @@ class _MisionsPage extends State<MisionsPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-            Text(
-            "Puntuación: ${mission['puntos']}",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 68, 64, 104),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: mission['completed']
-                  ? null
-                  : () async {
-                setState(() {
-                  mission['completed'] = true;
-                  dayPoints += (mission['puntos'] ?? 0) as int;
-                });
-                await _saveDailyState();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: mission['completed']
-                    ? Colors.grey
-                    : Color.fromARGB(255, 68, 64, 104),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                Text(
+                  "Puntuación: ${mission['puntos']}",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(255, 68, 64, 104),
+                  ),
                 ),
-              ),
-              child: Text(
-                mission['completed'] ? "Completada" : "Completar",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+                ElevatedButton(
+                  onPressed: mission['completed']
+                      ? null
+                      : () async {
+                    setState(() {
+                      mission['completed'] = true;
+                      dayPoints += (mission['puntos'] ?? 0) as int;
+                    });
+                    await _saveDailyState();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: mission['completed']
+                        ? Colors.grey
+                        : Color.fromARGB(255, 68, 64, 104),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    mission['completed'] ? "Completada" : "Completar",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
               ],
             ),
           ),
